@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SlinePLAY // Terminal</title>
+    <style>
+        /* --- БАЗОВЫЕ НАСТРОЙКИ (Анти-вайбкод: строгий дизайн) --- */
+        :root {
+            --bg-base: #09090b;
+            --bg-surface: #121214;
+            --border-color: #27272a;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --accent: #3b82f6; /* Спокойный синий */
+            --accent-hover: #2563eb;
+            --danger: #ef4444;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 24px;
+        }
+
+        /* --- ЭКРАН ВХОДА --- */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 80vh;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .login-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px 24px;
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: var(--font-main);
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--accent);
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: var(--font-main);
+            width: 100%;
+        }
+
+        button:hover { background: var(--accent-hover); }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 16px;
+            display: none;
+            text-align: center;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        /* --- ДАШБОРД --- */
+        #dashboard {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .username { font-weight: 500; font-size: 15px; }
+        .role { font-size: 12px; color: var(--text-secondary); }
+
+        .btn-logout {
+            width: auto;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        .btn-logout:hover { background: var(--border-color); color: var(--text-primary); }
+
+        .widget {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .widget-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Часы */
+        .clock-time {
+            font-family: var(--font-mono);
+            font-size: 32px;
+            font-weight: 500;
+            letter-spacing: -1px;
+        }
+        .clock-date {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Заметки */
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: var(--font-main);
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { border-color: var(--accent); }
+        .save-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            text-align: right;
+            height: 16px; /* Чтобы не прыгало */
+        }
+
+        /* Генератор паролей */
+        .password-display {
+            font-family: var(--font-mono);
+            background: var(--bg-base);
+            border: 1px dashed var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            color: var(--accent);
+            word-break: break-all;
+        }
+
+        /* Ссылки */
+        .links-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .link-item:hover { background: var(--border-color); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- ЭКРАН ВХОДА -->
+        <div id="login-screen">
+            <div class="login-box">
+                <div class="login-title">Вход в систему</div>
+                <div class="login-subtitle">Введите свои данные для доступа к терминалу.</div>
+                
+                <form id="login-form" autocomplete="off">
+                    <div class="input-group">
+                        <label>Логин</label>
+                        <input type="text" id="username" placeholder="Username" required autocapitalize="off" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="input-group">
+                        <label>Пароль</label>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit">Продолжить</button>
+                    <div class="error-msg" id="error-msg">Неверные данные. Попробуйте еще раз.</div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ДАШБОРД -->
+        <div id="dashboard">
+            <div class="header">
+                <div class="user-info">
+                    <div class="avatar">S</div>
+                    <div>
+                        <div class="username">SlinePLAY</div>
+                        <div class="role">Administrator</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+
+            <!-- Часы -->
+            <div class="widget">
+                <div class="clock-time" id="clock-time">00:00:00</div>
+                <div class="clock-date" id="clock-date">Загрузка...</div>
+            </div>
+
+            <!-- Заметки -->
+            <div class="widget">
+                <div class="widget-header">
+                    <div class="widget-title">Быстрые заметки</div>
+                </div>
+                <textarea id="notes" placeholder="Пиши здесь... (сохраняется автоматически)"></textarea>
+                <div class="save-status" id="save-status"></div>
+            </div>
+
+            <!-- Генератор -->
+            <div class="widget">
+                <div class="widget-header">
+                    <div class="widget-title">Генератор паролей</div>
+                </div>
+                <div class="password-display" id="gen-password">••••••••••••</div>
+                <button onclick="generatePassword()">Сгенерировать</button>
+            </div>
+
+            <!-- Ссылки -->
+            <div class="widget">
+                <div class="widget-header">
+                    <div class="widget-title">Ресурсы</div>
+                </div>
+                <div class="links-grid">
+                    <a href="https://slimchat.me" target="_blank" class="link-item">SlimChat</a>
+                    <a href="https://www.roblox.com" target="_blank" class="link-item">Roblox</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- ЛОГИКА ВХОДА ---
+        const CORRECT_USER = "SlinePLAY";
+        const CORRECT_PASS = "zer0FUN9903clanBEST";
+
+        document.getElementById("login-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            // Убираем пробелы, чтобы избежать ошибок с мобильной клавиатуры
+            const user = document.getElementById("username").value.trim();
+            const pass = document.getElementById("password").value.trim();
+            const errorMsg = document.getElementById("error-msg");
+
+            if (user === CORRECT_USER && pass === CORRECT_PASS) {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("dashboard").style.display = "block";
+                
+                // Запускаем часы и загружаем заметки
+                startClock();
+                loadNotes();
+            } else {
+                errorMsg.style.display = "block";
+                // Очищаем поле пароля при ошибке
+                document.getElementById("password").value = "";
+            }
+        });
+
+        function logout() {
+            // Перезагружаем страницу, чтобы вернуться на экран входа
+            window.location.reload();
+        }
+
+        // --- ЧАСЫ ---
+        function startClock() {
+            function updateClock() {
+                const now = new Date();
+                
+                // Время
+                const timeStr = now.toLocaleTimeString('ru-RU');
+                document.getElementById('clock-time').textContent = timeStr;
+                
+                // Дата
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateStr = now.toLocaleDateString('ru-RU', options);
+                // Делаем первую букву заглавной
+                document.getElementById('clock-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+            }
+            
+            updateClock();
+            setInterval(updateClock, 1000); // Обновляем каждую секунду
+        }
+
+        // --- ЗАМЕТКИ (Сохранение в браузере) ---
+        const notesArea = document.getElementById('notes');
+        const saveStatus = document.getElementById('save-status');
+        let saveTimeout;
+
+        function loadNotes() {
+            const savedNotes = localStorage.getItem('slineplay_notes');
+            if (savedNotes) {
+                notesArea.value = savedNotes;
+            }
+        }
+
+        notesArea.addEventListener('input', function() {
+            saveStatus.textContent = "Сохранение...";
+            
+            // Защита от слишком частых записей (ждем 1 секунду после окончания ввода)
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                localStorage.setItem('slineplay_notes', notesArea.value);
+                saveStatus.textContent = "✓ Сохранено";
+                
+                // Убираем надпись через 2 секунды
+                setTimeout(() => { saveStatus.textContent = ""; }, 2000);
+            }, 1000);
+        });
+
+        // --- ГЕНЕРАТОР ПАРОЛЕЙ ---
+        function generatePassword() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+            const length = 16;
+            let password = "";
+            
+            for (let i = 0; i < length; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            document.getElementById('gen-password').textContent = password;
+        }
+    </script>
+</body>
+</html>
